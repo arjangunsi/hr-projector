@@ -1,4 +1,3 @@
-import pybaseball as pb
 import pandas as pd
 
 _cache: dict = {}
@@ -8,7 +7,7 @@ def get_batter_stats_2026() -> dict:
         return _cache
 
     try:
-        # Pull all statcast data for 2026 season so far
+        import pybaseball as pb
         df = pb.statcast(start_dt="2026-03-27", end_dt="2026-05-28")
 
         # Filter to fly balls only
