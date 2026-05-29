@@ -10,7 +10,7 @@ export default function App() {
   const judgeRef = useRef<HTMLImageElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
   const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const ctaRef = useRef<HTMLButtonElement>(null)
+  const ctaRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function App() {
           <img
             ref={judgeRef}
             src="/judge.png"
-            alt="Aaron Judge swing"
+            alt="batter"
             style={{
               height: '96vh',
               objectFit: 'contain',
@@ -163,6 +163,7 @@ export default function App() {
             color: '#4477ff', fontSize: '11px', fontWeight: 700,
             letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '18px'
           }}>Statcast · XGBoost · 2.8M pitches</p>
+
           <div ref={titleRef} style={{ opacity: 0 }}>
             <h1 style={{
               color: '#fff', fontSize: 'clamp(44px, 6vw, 76px)',
@@ -176,6 +177,7 @@ export default function App() {
               }}>Projector</span>
             </h1>
           </div>
+
           <p ref={subtitleRef} style={{
             color: 'rgba(255,255,255,0.5)', fontSize: '15px',
             lineHeight: 1.8, margin: '0 0 40px', opacity: 0
@@ -183,20 +185,39 @@ export default function App() {
             ML-powered home run probability engine.<br />
             4 seasons · 131K fly balls · AUC 0.953
           </p>
-          <button ref={ctaRef}
-            style={{
-              background: 'linear-gradient(135deg, #0f2fa8, #1f55ff)',
-              color: '#fff', border: '1px solid rgba(80,140,255,0.25)',
-              padding: '15px 44px', borderRadius: '8px',
-              fontSize: '14px', fontWeight: 600, cursor: 'pointer', opacity: 0,
-              boxShadow: '0 0 50px rgba(20,70,255,0.3)',
-              letterSpacing: '0.08em'
-            }}
-            onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-            onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-          >
-            Launch Projector →
-          </button>
+
+          <div ref={ctaRef} style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #0f2fa8, #1f55ff)',
+                color: '#fff', border: '1px solid rgba(80,140,255,0.25)',
+                padding: '15px 44px', borderRadius: '8px',
+                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                boxShadow: '0 0 50px rgba(20,70,255,0.3)',
+                letterSpacing: '0.08em', width: '100%'
+              }}
+              onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
+              onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+              onClick={() => window.location.href = '/today'}
+            >
+              Today's HR Candidates →
+            </button>
+            <button
+              style={{
+                background: 'transparent',
+                color: 'rgba(255,255,255,0.55)',
+                border: '1px solid rgba(80,140,255,0.2)',
+                padding: '15px 44px', borderRadius: '8px',
+                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                letterSpacing: '0.08em', width: '100%'
+              }}
+              onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
+              onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+              onClick={() => window.location.href = '/projector'}
+            >
+              Manual Projector →
+            </button>
+          </div>
         </div>
 
         <div style={{
