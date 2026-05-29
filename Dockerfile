@@ -13,4 +13,4 @@ COPY api/ ./api/
 COPY models/ ./models/
 
 EXPOSE 8000
-CMD python -m uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}
+CMD ["sh", "-c", "python -m uvicorn api.main:app --host 0.0.0.0 --port $PORT"]
