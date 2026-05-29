@@ -1,11 +1,39 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import Nav from './Nav'
 import './App.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
+const STATS = [
+  { value: '0.953', label: 'Model AUC', sub: 'ROC score on held-out data' },
+  { value: '131K', label: 'Fly Balls', sub: 'training events, 4 seasons' },
+  { value: '2.8M', label: 'Pitches', sub: 'Statcast records analyzed' },
+  { value: '30', label: 'MLB Parks', sub: 'individual park factors' },
+]
+
+const HOW_IT_WORKS = [
+  {
+    step: '01',
+    title: 'Statcast Input',
+    desc: 'Exit velocity, launch angle, pitch speed, spin rate, park, handedness — the same variables MLB analysts use, pulled from the official Statcast feed.',
+  },
+  {
+    step: '02',
+    title: 'XGBoost Engine',
+    desc: 'A gradient-boosted ensemble trained on 131K fly ball events. Features include batter–pitcher platoon splits, count, pitcher fatigue, and park-adjusted carry.',
+  },
+  {
+    step: '03',
+    title: 'Live Rankings',
+    desc: "Before first pitch, every batter's matchup is scored and the day's leaderboard is built. You can also run one-off simulations with custom inputs.",
+  },
+]
+
 export default function App() {
+  const navigate = useNavigate()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const judgeRef = useRef<HTMLImageElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
@@ -23,7 +51,7 @@ export default function App() {
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r: Math.random() * 1.5 + 0.2,
-      drift: Math.random() * 0.002 + 0.001
+      drift: Math.random() * 0.002 + 0.001,
     }))
 
     let ballT = 0
@@ -75,21 +103,21 @@ export default function App() {
       { x: -200, opacity: 0, scale: 1.1 },
       { x: 0, opacity: 1, scale: 1, duration: 1.8, ease: 'power4.out' }
     )
-    .fromTo(titleRef.current,
-      { y: 80, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }, '-=1.0'
-    )
-    .fromTo(subtitleRef.current,
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out' }, '-=0.6'
-    )
-    .fromTo(ctaRef.current,
-      { y: 24, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, '-=0.4'
-    )
+      .fromTo(titleRef.current,
+        { y: 80, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1.2, ease: 'power3.out' }, '-=1.0'
+      )
+      .fromTo(subtitleRef.current,
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9, ease: 'power2.out' }, '-=0.6'
+      )
+      .fromTo(ctaRef.current,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, '-=0.4'
+      )
 
     gsap.to(judgeRef.current, {
-      y: -14, duration: 4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2.2
+      y: -14, duration: 4, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 2.2,
     })
 
     ScrollTrigger.create({
@@ -103,7 +131,18 @@ export default function App() {
         gsap.set(titleRef.current, { y: p * -80, opacity: 1 - p * 1.5 })
         gsap.set(subtitleRef.current, { y: p * -60, opacity: 1 - p * 2 })
         gsap.set(ctaRef.current, { y: p * -40, opacity: 1 - p * 2.5 })
-      }
+      },
+    })
+
+    gsap.utils.toArray<HTMLElement>('.fade-up').forEach(el => {
+      const delay = el.dataset.delay ? parseFloat(el.dataset.delay) : 0
+      gsap.fromTo(el,
+        { y: 48, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.85, ease: 'power3.out', delay,
+          scrollTrigger: { trigger: el, start: 'top 88%' },
+        }
+      )
     })
 
     const resize = () => {
@@ -119,130 +158,318 @@ export default function App() {
   }, [])
 
   return (
-    <div ref={wrapperRef} style={{ height: '200vh', background: '#00000a' }}>
-      <div style={{
-        position: 'sticky', top: 0,
-        width: '100vw', height: '100vh',
-        overflow: 'hidden',
-        fontFamily: "'Inter', 'Helvetica Neue', sans-serif"
-      }}>
-        <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 0 }} />
+    <div style={{ background: '#00000a', fontFamily: "'Inter', 'Helvetica Neue', sans-serif", overflowX: 'hidden' }}>
+      <Nav />
 
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <div ref={wrapperRef} style={{ height: '200vh', background: '#00000a' }}>
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
-          background: 'radial-gradient(ellipse at 30% 80%, rgba(10,40,150,0.3) 0%, transparent 60%)'
-        }} />
-
-        <div style={{
-          position: 'absolute', bottom: 0, left: '-1%',
-          zIndex: 3, height: '100vh',
-          display: 'flex', alignItems: 'flex-end'
+          position: 'sticky', top: 0,
+          width: '100vw', height: '100vh',
+          overflow: 'hidden',
+          background: 'radial-gradient(ellipse at 30% 90%, #0a1a6a 0%, #00000a 55%)',
         }}>
-          <img
-            ref={judgeRef}
-            src="/judge.png"
-            alt="batter"
-            style={{
-              height: '96vh',
-              objectFit: 'contain',
-              objectPosition: 'bottom',
-              filter: 'drop-shadow(0 0 50px rgba(20,60,255,0.6)) brightness(1.02) contrast(1.05)',
-              opacity: 0,
-              maskImage: 'linear-gradient(to right, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
-              WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
-            }}
-          />
-        </div>
+          <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, zIndex: 0 }} />
 
-        <div style={{
-          position: 'absolute', top: '50%', right: '5%',
-          transform: 'translateY(-50%)',
-          zIndex: 4, textAlign: 'right', maxWidth: '520px'
-        }}>
-          <p style={{
-            color: '#4477ff', fontSize: '11px', fontWeight: 700,
-            letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '18px'
-          }}>Statcast · XGBoost · 2.8M pitches</p>
-
-          <div ref={titleRef} style={{ opacity: 0 }}>
-            <h1 style={{
-              color: '#fff', fontSize: 'clamp(44px, 6vw, 76px)',
-              fontWeight: 800, lineHeight: 1.02, margin: '0 0 20px',
-              textShadow: '0 0 80px rgba(40,100,255,0.3)',
-            }}>
-              Home Run<br />
-              <span style={{
-                background: 'linear-gradient(90deg, #1a44dd, #55aaff)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-              }}>Projector</span>
-            </h1>
-          </div>
-
-          <p ref={subtitleRef} style={{
-            color: 'rgba(255,255,255,0.5)', fontSize: '15px',
-            lineHeight: 1.8, margin: '0 0 40px', opacity: 0
-          }}>
-            ML-powered home run probability engine.<br />
-            4 seasons · 131K fly balls · AUC 0.953
-          </p>
-
-          <div ref={ctaRef} style={{ opacity: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #0f2fa8, #1f55ff)',
-                color: '#fff', border: '1px solid rgba(80,140,255,0.25)',
-                padding: '15px 44px', borderRadius: '8px',
-                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-                boxShadow: '0 0 50px rgba(20,70,255,0.3)',
-                letterSpacing: '0.08em', width: '100%'
-              }}
-              onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-              onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-              onClick={() => window.location.href = '/today'}
-            >
-              Today's HR Candidates →
-            </button>
-            <button
-              style={{
-                background: 'transparent',
-                color: 'rgba(255,255,255,0.55)',
-                border: '1px solid rgba(80,140,255,0.2)',
-                padding: '15px 44px', borderRadius: '8px',
-                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-                letterSpacing: '0.08em', width: '100%'
-              }}
-              onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 })}
-              onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
-              onClick={() => window.location.href = '/projector'}
-            >
-              Manual Projector →
-            </button>
-          </div>
-        </div>
-
-        <div style={{
-          position: 'absolute', bottom: '22px', left: '50%',
-          transform: 'translateX(-50%)', zIndex: 4,
-          color: 'rgba(255,255,255,0.18)', fontSize: '10px',
-          letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap'
-        }}>
-          Built by Arjan Gunsi · UCSD Data Science
-        </div>
-
-        <div style={{
-          position: 'absolute', bottom: '40px', right: '5%',
-          zIndex: 4, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: '6px',
-          color: 'rgba(255,255,255,0.25)', fontSize: '10px',
-          letterSpacing: '0.15em', textTransform: 'uppercase'
-        }}>
-          <span>Scroll</span>
           <div style={{
-            width: '1px', height: '40px',
-            background: 'linear-gradient(to bottom, rgba(80,140,255,0.6), transparent)'
+            position: 'absolute', inset: 0, zIndex: 1,
+            background: 'radial-gradient(ellipse at 30% 80%, rgba(10,40,150,0.3) 0%, transparent 60%)',
           }} />
+
+          <div style={{
+            position: 'absolute', bottom: 0, left: '-1%',
+            zIndex: 3, height: '100vh',
+            display: 'flex', alignItems: 'flex-end',
+          }}>
+            <img
+              ref={judgeRef}
+              src="/judge.png"
+              alt="batter"
+              style={{
+                height: '96vh',
+                objectFit: 'contain',
+                objectPosition: 'bottom',
+                filter: 'drop-shadow(0 0 50px rgba(20,60,255,0.6)) brightness(1.02) contrast(1.05)',
+                opacity: 0,
+                maskImage: 'linear-gradient(to right, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+          </div>
+
+          <div style={{
+            position: 'absolute', top: '50%', right: '5%',
+            transform: 'translateY(-50%)',
+            zIndex: 4, textAlign: 'right', maxWidth: '520px',
+          }}>
+            <p style={{
+              color: '#4477ff', fontSize: '11px', fontWeight: 700,
+              letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '18px',
+            }}>Statcast · XGBoost · 2.8M pitches</p>
+
+            <div ref={titleRef} style={{ opacity: 0 }}>
+              <h1 style={{
+                color: '#fff', fontSize: 'clamp(44px, 6vw, 76px)',
+                fontWeight: 800, lineHeight: 1.02, margin: '0 0 20px',
+                textShadow: '0 0 80px rgba(40,100,255,0.3)',
+              }}>
+                Home Run<br />
+                <span style={{
+                  background: 'linear-gradient(90deg, #1a44dd, #55aaff)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                }}>Projector</span>
+              </h1>
+            </div>
+
+            <p ref={subtitleRef} style={{
+              color: 'rgba(255,255,255,0.5)', fontSize: '15px',
+              lineHeight: 1.8, margin: '0 0 40px', opacity: 0,
+            }}>
+              ML-powered home run probability engine.<br />
+              4 seasons · 131K fly balls · AUC 0.953
+            </p>
+
+            <div ref={ctaRef} style={{
+              opacity: 0, display: 'flex', flexDirection: 'column',
+              alignItems: 'flex-end', gap: '12px',
+            }}>
+              <button
+                style={{
+                  background: 'linear-gradient(135deg, #0f2fa8, #1f55ff)',
+                  color: '#fff', border: '1px solid rgba(80,140,255,0.25)',
+                  padding: '15px 44px', borderRadius: '8px',
+                  fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                  boxShadow: '0 0 50px rgba(20,70,255,0.3)',
+                  letterSpacing: '0.08em', width: '100%',
+                }}
+                onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
+                onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+                onClick={() => navigate('/today')}
+              >
+                Today's HR Candidates →
+              </button>
+              <button
+                style={{
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.55)',
+                  border: '1px solid rgba(80,140,255,0.2)',
+                  padding: '15px 44px', borderRadius: '8px',
+                  fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                  letterSpacing: '0.08em', width: '100%',
+                }}
+                onMouseEnter={e => gsap.to(e.currentTarget, { scale: 1.04, duration: 0.2 })}
+                onMouseLeave={e => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+                onClick={() => navigate('/projector')}
+              >
+                Manual Projector →
+              </button>
+            </div>
+          </div>
+
+          <div style={{
+            position: 'absolute', bottom: '36px', left: '50%',
+            transform: 'translateX(-50%)', zIndex: 4,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+            color: 'rgba(255,255,255,0.22)', fontSize: '10px',
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+          }}>
+            <span>Scroll to explore</span>
+            <div style={{
+              width: '1px', height: '44px',
+              background: 'linear-gradient(to bottom, rgba(80,140,255,0.55), transparent)',
+            }} />
+          </div>
         </div>
       </div>
+
+      {/* ── Stats bar ────────────────────────────────────────────── */}
+      <section style={{
+        padding: '72px 5%',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(10,20,60,0.15)',
+      }}>
+        <div style={{
+          maxWidth: '1100px', margin: '0 auto',
+          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px',
+        }}>
+          {STATS.map((s, i) => (
+            <div key={s.label} className="fade-up" data-delay={`${i * 0.09}`}
+              style={{ textAlign: 'center', padding: '16px 0' }}>
+              <p style={{
+                fontSize: 'clamp(38px, 4vw, 58px)', fontWeight: 800,
+                lineHeight: 1, marginBottom: '10px',
+                background: 'linear-gradient(180deg, #fff 0%, rgba(100,160,255,0.75) 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>{s.value}</p>
+              <p style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(255,255,255,0.75)', marginBottom: '5px' }}>{s.label}</p>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.28)' }}>{s.sub}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ─────────────────────────────────────────── */}
+      <section style={{ padding: '100px 5%' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="fade-up" style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <p style={{
+              fontSize: '11px', fontWeight: 700, letterSpacing: '0.28em',
+              color: '#4477ff', textTransform: 'uppercase', marginBottom: '14px',
+            }}>The Model</p>
+            <h2 style={{
+              fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 800,
+              color: '#fff', lineHeight: 1.1, margin: 0,
+            }}>How it works</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+            {HOW_IT_WORKS.map((item, i) => (
+              <div key={item.step} className="fade-up" data-delay={`${i * 0.14}`} style={{
+                padding: '36px 30px',
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '16px', position: 'relative', overflow: 'hidden',
+              }}>
+                <div style={{
+                  position: 'absolute', top: '-16px', right: '-16px',
+                  fontSize: '110px', fontWeight: 800, lineHeight: 1,
+                  color: '#fff', opacity: 0.03, userSelect: 'none', pointerEvents: 'none',
+                }}>{item.step}</div>
+                <p style={{
+                  fontSize: '11px', fontWeight: 700, letterSpacing: '0.22em',
+                  color: '#4477ff', textTransform: 'uppercase', marginBottom: '14px',
+                }}>{item.step}</p>
+                <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>
+                  {item.title}
+                </h3>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.75 }}>
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Tool cards ───────────────────────────────────────────── */}
+      <section style={{
+        padding: '80px 5% 110px',
+        background: 'rgba(8,15,50,0.2)',
+        borderTop: '1px solid rgba(255,255,255,0.05)',
+      }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="fade-up" style={{ textAlign: 'center', marginBottom: '52px' }}>
+            <p style={{
+              fontSize: '11px', fontWeight: 700, letterSpacing: '0.28em',
+              color: '#4477ff', textTransform: 'uppercase', marginBottom: '14px',
+            }}>Tools</p>
+            <h2 style={{
+              fontSize: 'clamp(28px, 4vw, 46px)', fontWeight: 800,
+              color: '#fff', lineHeight: 1.1, margin: 0,
+            }}>Pick your angle</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="fade-up" data-delay="0.05"
+              onClick={() => navigate('/today')}
+              style={{
+                padding: '44px 38px', borderRadius: '18px', cursor: 'pointer',
+                background: 'linear-gradient(140deg, rgba(15,47,168,0.28) 0%, rgba(31,85,255,0.10) 100%)',
+                border: '1px solid rgba(80,140,255,0.22)',
+                transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.borderColor = 'rgba(80,140,255,0.5)'
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(20,70,255,0.15)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.borderColor = 'rgba(80,140,255,0.22)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            >
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '10px',
+                background: 'rgba(30,80,255,0.18)', border: '1px solid rgba(80,140,255,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', marginBottom: '20px',
+              }}>📊</div>
+              <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', marginBottom: '10px' }}>
+                Today's Candidates
+              </h3>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.75, marginBottom: '28px' }}>
+                Live daily leaderboard of every batter ranked by HR probability across today's full MLB slate.
+                Updated before first pitch each day.
+              </p>
+              <span style={{ color: '#55aaff', fontSize: '14px', fontWeight: 600 }}>
+                View leaderboard →
+              </span>
+            </div>
+
+            <div className="fade-up" data-delay="0.17"
+              onClick={() => navigate('/projector')}
+              style={{
+                padding: '44px 38px', borderRadius: '18px', cursor: 'pointer',
+                background: 'rgba(255,255,255,0.028)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-5px)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.3)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            >
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '10px',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', marginBottom: '20px',
+              }}>⚾</div>
+              <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', marginBottom: '10px' }}>
+                Manual Projector
+              </h3>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.42)', lineHeight: 1.75, marginBottom: '28px' }}>
+                Enter your own Statcast values — exit velo, launch angle, pitch speed, spin rate — and get
+                an instant probability for any matchup you can imagine.
+              </p>
+              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: '14px', fontWeight: 600 }}>
+                Open projector →
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────── */}
+      <footer style={{
+        padding: '32px 5%',
+        borderTop: '1px solid rgba(255,255,255,0.055)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        flexWrap: 'wrap', gap: '12px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '24px', height: '24px',
+            background: 'linear-gradient(135deg, #0f2fa8, #1f55ff)',
+            borderRadius: '5px', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '10px', fontWeight: 800, color: '#fff',
+          }}>HR</div>
+          <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)' }}>
+            Built by Arjan Gunsi · UCSD Data Science
+          </span>
+        </div>
+        <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.06em' }}>
+          Statcast · XGBoost · AUC 0.953
+        </p>
+      </footer>
     </div>
   )
 }

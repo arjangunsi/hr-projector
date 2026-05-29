@@ -1,8 +1,11 @@
 data/
-models/
-*.pkl
+# Keep model files (small enough to commit)
+# models/
+# *.pkl
 *.csv
 *.parquet
 __pycache__/
 .ipynb_checkpoints/
 .env
+node_modules/
+frontend/build/

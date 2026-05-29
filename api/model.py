@@ -2,8 +2,9 @@ import pickle
 import os
 import pandas as pd
 
-MODEL_PATH = os.path.join(os.path.expanduser("~"), "hr-projector", "models", "xgb_hr_model.pkl")
-FEATURES_PATH = os.path.join(os.path.expanduser("~"), "hr-projector", "models", "feature_cols.pkl")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(_ROOT, "models", "xgb_hr_model.pkl")
+FEATURES_PATH = os.path.join(_ROOT, "models", "feature_cols.pkl")
 
 with open(MODEL_PATH, "rb") as f:
     model = pickle.load(f)
