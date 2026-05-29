@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import project
+from api.routers import project, matchups
 
 app = FastAPI(title="HR Projector API")
 
@@ -12,6 +12,7 @@ app.add_middleware(
 )
 
 app.include_router(project.router, prefix="/project")
+app.include_router(matchups.router, prefix="/matchups")
 
 @app.get("/")
 def root():
