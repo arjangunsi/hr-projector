@@ -6,11 +6,16 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(_ROOT, "models", "xgb_hr_model.pkl")
 FEATURES_PATH = os.path.join(_ROOT, "models", "feature_cols.pkl")
 
-with open(MODEL_PATH, "rb") as f:
-    model = pickle.load(f)
+_model = None
+_feature_cols = None
 
-with open(FEATURES_PATH, "rb") as f:
-    feature_cols = pickle.load(f)
+def _load():
+    global _model, _feature_cols
+    if _model is None:
+        with open(MODEL_PATH, "rb") as f:
+            _model = pickle.load(f)
+        with open(FEATURES_PATH, "rb") as f:
+            _feature_cols = pickle.load(f)
 
 PARK_FACTORS = {
     "CIN": 0.183, "ATL": 0.182, "NYY": 0.181, "LAD": 0.179, "PHI": 0.179,
@@ -44,10 +49,12 @@ def build_feature_vector(
     for pt in PITCH_TYPES:
         row[f"pitch_{pt}"] = 1 if pitch_type == pt else 0
 
+    _load()
     df = pd.DataFrame([row])
-    df = df.reindex(columns=feature_cols, fill_value=0)
+    df = df.reindex(columns=_feature_cols, fill_value=0)
     return df
 
 def predict_hr_probability(feature_vector):
-    prob = model.predict_proba(feature_vector)[0][1]
+    _load()
+    prob = _model.predict_proba(feature_vector)[0][1]
     return round(float(prob), 4)

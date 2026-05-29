@@ -17,3 +17,7 @@ app.include_router(matchups.router, prefix="/matchups")
 @app.get("/")
 def root():
     return {"status": "ok", "message": "HR Projector API running"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
